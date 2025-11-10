@@ -5,14 +5,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import Router from './Route/Server.js';
 import uploadRoutes from './Route/upload.js';
-
+import 'dotenv/config'; 
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // --- MongoDB connection ---
-mongoose.connect('mongodb+srv://Waqas:waqas123456@cluster0.it1sk4f.mongodb.net/BlogWeb?appName=Cluster0')
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
