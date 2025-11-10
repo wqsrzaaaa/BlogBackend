@@ -5,6 +5,9 @@ import uploadRoutes from './Route/upload.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables from .env
 
 const app = express();
 
@@ -13,9 +16,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // --- MongoDB connection ---
-mongoose.connect('mongodb://127.0.0.1:27017/Blog')
+const mongoURI = process.env.MONGODB_URI;
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error(err));
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // --- Middleware ---
 app.use(express.json({ limit: "10mb" }));
@@ -30,10 +34,9 @@ app.use(uploadRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/BlogUploads', express.static(path.join(__dirname, 'BlogUploads')));
 
-// --- Serve frontend build (React) ---
+// --- Serve frontend build (optional) ---
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Catch-all route to serve frontend for any unknown route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
