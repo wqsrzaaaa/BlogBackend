@@ -7,59 +7,14 @@ import auth from '../Controller/auth.js';
 
 const Router = express.Router();
 
+// --- Auth/User routes ---
 Router.post('/signup', SignIn);
 Router.post('/login', Login);
-Router.get('/current-user', auth, CurrentUser)
+Router.get('/current-user', auth, CurrentUser);
+Router.get('/alluser', AllUser);
+
+// --- Blog routes ---
 Router.post('/create', BlogCreate);
-
-Router.post('/update-profile/:id', async (req, res) => {
-  try {
-    const { username, bio, profile, banner } = req.body;
-    const userId = req.params.id;
-
-    const existingUser = await User.findOne({
-      username: username,
-      _id: { $ne: userId }, 
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Username is already in use",
-      });
-    }
-
-    // 2️⃣ If unique, proceed to update
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { username, bio, profile, banner },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    // 3️⃣ Success response
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-      user: updatedUser,
-    });
-
-  } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update profile",
-    });
-  }
-});
-
-
 Router.get('/all', async (req, res) => {
   try {
     const data = await Blog.find()
@@ -68,12 +23,10 @@ Router.get('/all', async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ success: false, message: "Failed to fetch blogs" });
   }
 });
-
-Router.get("/user/:id", UserProfile)
 
 Router.get('/myblogs', auth, async (req, res) => {
   try {
@@ -83,12 +36,47 @@ Router.get('/myblogs', auth, async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
-Router.get('/alluser', AllUser)
+
+Router.get('/user/:id', UserProfile);
+Router.get('/blog/:id', getSingleBlog);
 Router.put('/myblog/edit/:id', BlogUpdate);
-Router.delete('/myblog/delete/:id', DeleteBlog)
-Router.get("/blog/:id", getSingleBlog);
-Router.post('/follow/:id', following)
-Router.post('/unfollow/:id', auth, unfollowUser)
-Router.post("/:blogId/like", auth, LikeBlog);
+Router.delete('/myblog/delete/:id', DeleteBlog);
+Router.post('/:blogId/like', auth, LikeBlog);
+
+// --- Follow/unfollow ---
+Router.post('/follow/:id', following);
+Router.post('/unfollow/:id', auth, unfollowUser);
+
+// --- Update profile ---
+Router.post('/update-profile/:id', async (req, res) => {
+  try {
+    const { username, bio, profile, banner } = req.body;
+    const userId = req.params.id;
+
+    const existingUser = await User.findOne({
+      username,
+      _id: { $ne: userId },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Username is already in use" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { username, bio, profile, banner },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, message: "Profile updated successfully", user: updatedUser });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ success: false, message: "Failed to update profile" });
+  }
+});
 
 export default Router;

@@ -1,53 +1,50 @@
 import express from 'express';
 import cors from 'cors';
-import Router from './Route/Server.js';
-import uploadRoutes from './Route/upload.js';
+import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config(); // Load environment variables from .env
+import Router from './Route/Server.js';
+import uploadRoutes from './Route/upload.js';
 
 const app = express();
 
-// --- __dirname fix for ES modules ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // --- MongoDB connection ---
-const mongoURI = process.env.MONGODB_URI;
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+mongoose.connect('mongodb+srv://Waqas:waqas123456@cluster0.it1sk4f.mongodb.net/BlogWeb?appName=Cluster0')
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // --- Middleware ---
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cors());
-
-// --- Routes ---
-app.use(Router);
-app.use(uploadRoutes);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // --- Static folders ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/BlogUploads', express.static(path.join(__dirname, 'BlogUploads')));
 
-// --- Serve frontend build (optional) ---
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+// --- Upload routes first (avoid conflicts with parameterized routes) ---
+app.use(uploadRoutes); // Routes like /upload-profile, /upload-banner, /blog/upload
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
+// --- API routes ---
+app.use(Router);      // Routes like /signup, /login, /:blogId/like, etc.
 
 // --- Test route ---
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Backend is working!' });
+app.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Backend is working!' });
 });
+
+// --- Serve React frontend ---
+app.use(express.static(path.join(__dirname, '../client/build')));
+app.get('/*path', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
+
 
 // --- Start server ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`App is live at port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

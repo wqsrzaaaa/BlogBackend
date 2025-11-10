@@ -22,20 +22,20 @@ const upload = multer({ storage });
 //  Profile Picture
 router.post('/upload-profile', upload.single('profile'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-  const filePath = `http://localhost:3000/uploads/${req.file.filename}`;
+  const filePath = `/uploads/${req.file.filename}`;
   res.json({ success: true, url: filePath });
 });
 
 //  Banner Picture
 router.post('/upload-banner', upload.single('banner'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-  const filePath = `http://localhost:3000/uploads/${req.file.filename}`;
+  const filePath = `/uploads/${req.file.filename}`;
   res.json({ success: true, url: filePath });
 });
 
 router.post('/blog/upload', upload.single('blog'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-  const filePath = `http://localhost:3000/uploads/${req.file.filename}`;
+  const filePath = `/uploads/${req.file.filename}`;
   res.json({ success: true, url: filePath });
 });
 
