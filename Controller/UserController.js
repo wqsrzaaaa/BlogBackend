@@ -176,10 +176,11 @@ export const CurrentUser = async (req, res) => {
     const me = await user.findById(req.userId)
       .select('-password')
       .populate({
-        path: 'blogs',
-        populate: {
-          path: 'author',
-        }
+        path: 'blog', 
+        populate: [
+          { path: 'author'},
+          { path: 'likes'}
+        ]
       })
       .populate({
         path: 'follower',
