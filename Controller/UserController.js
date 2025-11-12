@@ -2,6 +2,7 @@ import user from "../models/User.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import Blog from "../models/Blog.js";
+import path from "path";
 
 const SignIn = async (req, res) => {
   const { username, email, password } = req.body;
@@ -176,10 +177,10 @@ export const CurrentUser = async (req, res) => {
     const me = await user.findById(req.userId)
       .select('-password')
       .populate({
-        path: 'blog', 
+        path: 'blogs',
         populate: [
-          { path: 'author'},
-          { path: 'likes'}
+          {path: 'author'},
+          {path: 'likes'}
         ]
       })
       .populate({
