@@ -177,26 +177,28 @@ export const CurrentUser = async (req, res) => {
     const me = await user.findById(req.userId)
       .select('-password')
       .populate({
-        path: 'blogs',
+        path: "blogs",
         populate: [
-          {path: 'author'},
-          {path: 'likes'}
+          {
+            path: "author",
+            select: "username profile "
+          },
+          {
+            path: "likes",
+            select: "profile "
+          }
         ]
       })
       .populate({
         path: 'follower',
-        populate: {
-          path: 'blogs',
-          populate: { path: 'author' }
-        }
+        select: 'username profile _id' 
       })
       .populate({
         path: 'following',
-        populate: {
-          path: 'blogs',
-          populate: { path: 'author' }
-        }
-      });
+        select: 'username profile _id' 
+      })
+      .lean(); 
+
 
     if (!me) {
       return res.status(404).json({ success: false, message: "User not found" });

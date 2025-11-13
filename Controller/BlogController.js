@@ -94,7 +94,7 @@ export const LikeBlog = async (req, res) => {
 export const getSingleBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id)
-      .populate("author", "username profile"); // optional, populate author details
+      .populate("author", "username profile"); 
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
