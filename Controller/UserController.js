@@ -172,33 +172,21 @@ export const unfollowUser = async (req, res) => {
 };
 
 
+
 export const CurrentUser = async (req, res) => {
   try {
-    const me = await user.findById(req.userId)
-      .select('-password')
+    const me = await User.findById(req.userId)
+      .select('-password') // exclude password only
       .populate({
         path: "blogs",
         populate: [
-          {
-            path: "author",
-            select: "username profile "
-          },
-          {
-            path: "likes",
-            select: "profile "
-          }
+          { path: "author" },
+          { path: "likes" }
         ]
       })
-      .populate({
-        path: 'follower',
-        select: 'username profile _id' 
-      })
-      .populate({
-        path: 'following',
-        select: 'username profile _id' 
-      })
+      .populate('follower')
+      .populate('following')
       .lean(); 
-
 
     if (!me) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -206,7 +194,7 @@ export const CurrentUser = async (req, res) => {
 
     res.json({ success: true, user: me });
   } catch (error) {
-    console.error(error);
+    console.error('Error in CurrentUser:', error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
