@@ -175,7 +175,7 @@ export const unfollowUser = async (req, res) => {
 
 export const CurrentUser = async (req, res) => {
   try {
-    const me = await User.findById(req.userId)
+    const me = await user.findById(req.userId)
       .select('-password') // exclude password only
       .populate({
         path: "blogs",
